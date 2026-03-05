@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anketa | Hlasování</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="voting-card">
+            <h1>{{ quest.question }}</h1>
+            <form id="vote-form">
+                <div class="options-list">
+                    {% for opt in quest.options %}
+                    <label class="option">
+                        <input type="radio" name="vote" value="{{ opt.id }}" required>
+                        <span class="option-label">{{ opt.label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <button type="submit" id="submit-btn">Odeslat hlas</button>
+                <button type="button" class="secondary" id="show-results-btn">Zobrazit výsledky bez hlasování</button>
+            </form>
+        </div>
+
+        <div id="results-card" class="results-section" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Aktuální výsledky</h2>
+                <span id="live-indicator"
+                    style="font-size: 0.7rem; color: var(--accent); background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 20px;">●
+                    LIVE</span>
+            </div>
+
+            <div style="margin-bottom: 30px; background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px;">
+                <canvas id="resultsChart"></canvas>
+            </div>
+
+            <div id="results-container">
+                <!-- JS will inject results here -->
+            </div>
+            <button class="secondary" id="back-to-vote-btn" style="margin-top: 20px;">Zpět k hlasování</button>
+            <button class="secondary" id="reset-btn"
+                style="color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">Resetovat hlasy</button>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Webová Anketa | <a href="/about">O anketě a hlášení chyb</a></p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com/MonsterMarian/AnketaWA/tree/main" target="_blank" style="display: inline-block; padding: 8px 16px; background: var(--accent, #6366f1); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem;">Nahlásit issue</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>

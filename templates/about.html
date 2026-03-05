@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O anketě | Podpora</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h1>O této anketě</h1>
+
+        <div class="about-content">
+            <p>Tato webová aplikace byla vytvořena jako ukázkový projekt pro demonstraci full-stack vývoje v Pythonu a
+                JavaScriptu. Cílem projektu je umožnit uživatelům anonymně hlasovat o důležitých otázkách moderního
+                života.</p>
+
+            <h2>Jak to funguje?</h2>
+            <p>Vaše hlasy jsou bezpečně ukládány na našem serveru v reálném čase. Aplikace nevyužívá žádné sledovací
+                soubory cookies ani úložiště ve vašem prohlížeči pro ukládání výsledků – vše je synchronizováno pro
+                všechny uživatele globálně.</p>
+
+            <div class="bug-report">
+                <h2>Našli jste chybu?</h2>
+                <p>Pokud narazíte na jakýkoli technický problém, gramatickou chybu nebo máte nápad na zlepšení, dejte
+                    nám prosím vědět!</p>
+                <p style="margin-top: 15px; margin-bottom: 15px;">
+                    <a href="https://github.com/MonsterMarian/AnketaWA/tree/main" target="_blank"
+                        style="display: inline-block; padding: 10px 20px; background: var(--accent, #6366f1); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">Nahlásit
+                        issue</a>
+                </p>
+                <p style="margin-top: 10px;"><strong>E-mail pro hlášení:</strong> support@webova-anketa.cz</p>
+                <p>Do předmětu zprávy prosím uveďte "BUG: [stručný popis chyby]".</p>
+            </div>
+        </div>
+
+        <button class="secondary" onclick="window.location.href='/'" style="margin-top: 30px;">Zpět na hlavní
+            stránku</button>
+
+        <footer>
+            <p>&copy; 2026 Webová Anketa | <a href="/">Domů</a></p>
+        </footer>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="cs">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Anketa</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container" id="login-form">
+        <h1>Admin Přihlášení</h1>
+        <div class="options-list">
+            <input type="password" id="admin-token" placeholder="Vložte tajný token" class="option-label"
+                style="width: 100%; margin-bottom: 20px;">
+        </div>
+        <button id="login-btn">Vstoupit</button>
+    </div>
+
+    <div class="container" id="stats-panel" style="display: none;">
+        <h1>Admin Dashboard</h1>
+
+        <div class="bug-report" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div>
+                <p style="color: var(--text-muted)">Celkem kliknutí</p>
+                <h2 id="total-clicks">0</h2>
+            </div>
+            <div>
+                <p style="color: var(--text-muted)">Unikátní IP</p>
+                <h2 id="unique-ips">0</h2>
+            </div>
+            <div style="grid-column: span 2;">
+                <p style="color: var(--text-muted)">Poslední hlas</p>
+                <h2 id="last-vote-time" style="font-size: 1.2rem;">-</h2>
+            </div>
+        </div>
+
+        <div id="admin-results-container" class="results-section">
+            <!-- Stats will be injected here -->
+        </div>
+
+        <button class="secondary" id="logout-btn" style="margin-top: 30px;">Odhlásit se</button>
+    </div>
+
+    <script>
+        const tokenInput = document.getElementById('admin-token');
+        const loginBtn = document.getElementById('login-btn');
+        const loginForm = document.getElementById('login-form');
+        const statsPanel = document.getElementById('stats-panel');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        const loadStats = async () => {
+            const token = localStorage.getItem('adminToken');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/admin/stats', {
+                    headers: { 'Authorization': token }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('total-clicks').textContent = data.meta.total_clicks;
+                    document.getElementById('unique-ips').textContent = data.unique_ips;
+                    document.getElementById('last-vote-time').textContent = data.meta.last_vote;
+
+                    loginForm.style.display = 'none';
+                    statsPanel.style.display = 'block';
+                } else {
+                    localStorage.removeItem('adminToken');
+                    location.reload();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        loginBtn.addEventListener('click', () => {
+            localStorage.setItem('adminToken', tokenInput.value.trim());
+            loadStats();
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('adminToken');
+            location.reload();
+        });
+
+        if (localStorage.getItem('adminToken')) loadStats();
+    </script>
+</body>
+
+</html>
