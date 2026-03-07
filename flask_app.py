@@ -1,12 +1,12 @@
 import os
 import json
 from flask import Flask, render_template, request, jsonify
-from config import RESET_TOKEN, VOTE_FILE, QUESTIONS
+from config import RESET_TOKEN, VOTE_FILE, QUESTIONS, BASE_DIR
 from datetime import datetime
 from filelock import FileLock
 
-VOTERS_FILE = "data/voters.txt"
-META_FILE = "data/meta.json"
+VOTERS_FILE = os.path.join(BASE_DIR, "data", "voters.txt")
+META_FILE = os.path.join(BASE_DIR, "data", "meta.json")
 
 app = Flask(__name__)
 
@@ -14,9 +14,9 @@ app = Flask(__name__)
 os.makedirs(os.path.dirname(VOTE_FILE), exist_ok=True)
 
 # File locks for thread/process safety
-meta_lock = FileLock("data/meta.json.lock")
-vote_lock = FileLock("data/votes.json.lock")
-voters_lock = FileLock("data/voters.txt.lock")
+meta_lock = FileLock(os.path.join(BASE_DIR, "data", "meta.json.lock"))
+vote_lock = FileLock(os.path.join(BASE_DIR, "data", "votes.json.lock"))
+voters_lock = FileLock(os.path.join(BASE_DIR, "data", "voters.txt.lock"))
 
 @app.after_request
 def add_security_headers(response):
