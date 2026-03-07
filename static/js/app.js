@@ -5,8 +5,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results-container');
     const showResultsBtn = document.getElementById('show-results-btn');
     const backToVoteBtn = document.getElementById('back-to-vote-btn');
-    const resetBtn = document.getElementById('reset-btn');
     const liveIndicator = document.getElementById('live-indicator');
+
+    const votedText = localStorage.getItem('votedOptionText');
+    if (votedText) {
+        const infoMsg = document.createElement('div');
+        infoMsg.className = 'info-message';
+        infoMsg.style.cssText = 'background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.2);';
+        infoMsg.innerHTML = `Váš uložený hlas: <strong>${votedText}</strong>`;
+        voteForm.prepend(infoMsg);
+    }
 
     let resultsChart = null;
     let pollingInterval = null;
@@ -128,11 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (res.status === 403) {
                 alert('Již jste hlasoval(a). Více hlasů není povoleno.');
-                fetchResults();
+                fetchResults(true);
                 return;
             }
 
             const votes = await res.json();
+            const selectedText = selected.nextElementSibling.textContent;
+            localStorage.setItem('votedOptionText', selectedText);
             runConfetti();
             updateResultsUI(votes);
             votingCard.style.display = 'none';
@@ -149,28 +159,5 @@ document.addEventListener('DOMContentLoaded', () => {
         stopPolling();
         resultsCard.style.display = 'none';
         votingCard.style.display = 'block';
-    });
-
-    resetBtn.addEventListener('click', async () => {
-        let token = prompt('Zadejte administrátorský token pro reset:');
-        if (!token) return;
-        token = token.trim();
-
-        try {
-            const res = await fetch('/api/reset', {
-                method: 'POST',
-                headers: { 'Authorization': token }
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                updateResultsUI(data.votes);
-                alert('Všechny hlasy byly vynulovány.');
-            } else {
-                alert('Nesprávný token.');
-            }
-        } catch (err) {
-            alert('Chyba při resetování.');
-        }
     });
 });

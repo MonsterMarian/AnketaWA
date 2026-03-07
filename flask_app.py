@@ -25,6 +25,7 @@ def add_security_headers(response):
     return response
 
 def load_votes():
+    """Načte hlasy (pouze pro čtení, např. GET /api/results)."""
     with vote_lock:
         if not os.path.exists(VOTE_FILE):
             votes = {opt["id"]: 0 for opt in QUESTIONS["options"]}
@@ -34,7 +35,29 @@ def load_votes():
         with open(VOTE_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
 
+def increment_vote(option_id):
+    """Atomický Read-Modify-Write pod jedním drženým vote_lock.
+    Vrací aktualizovaný dict hlasů.
+    """
+    with vote_lock:
+        if not os.path.exists(VOTE_FILE):
+            votes = {opt["id"]: 0 for opt in QUESTIONS["options"]}
+        else:
+            with open(VOTE_FILE, 'r', encoding='utf-8') as f:
+                votes = json.load(f)
+        votes[option_id] += 1
+        with open(VOTE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(votes, f, indent=4)
+        return votes
+
+def save_votes(votes):
+    """Přímý zápis hlasů (používá reset)."""
+    with vote_lock:
+        with open(VOTE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(votes, f, indent=4)
+
 def load_meta():
+    """Načte metadata (pouze pro čtení)."""
     with meta_lock:
         if not os.path.exists(META_FILE):
             meta = {"last_vote": "Nikdy", "total_clicks": 0}
@@ -44,15 +67,24 @@ def load_meta():
         with open(META_FILE, 'r', encoding='utf-8') as f:
             return json.load(f)
 
-def save_meta(meta):
+def update_meta(last_vote_str):
+    """Atomický Read-Modify-Write metadat pod jedním drženým meta_lock."""
     with meta_lock:
+        if not os.path.exists(META_FILE):
+            meta = {"last_vote": "Nikdy", "total_clicks": 0}
+        else:
+            with open(META_FILE, 'r', encoding='utf-8') as f:
+                meta = json.load(f)
+        meta["last_vote"] = last_vote_str
+        meta["total_clicks"] += 1
         with open(META_FILE, 'w', encoding='utf-8') as f:
             json.dump(meta, f, indent=4)
 
-def save_votes(votes):
-    with vote_lock:
-        with open(VOTE_FILE, 'w', encoding='utf-8') as f:
-            json.dump(votes, f, indent=4)
+def save_meta(meta):
+    """Přímý zápis metadat (používá reset)."""
+    with meta_lock:
+        with open(META_FILE, 'w', encoding='utf-8') as f:
+            json.dump(meta, f, indent=4)
 
 @app.route('/')
 def index():
@@ -90,16 +122,9 @@ def vote():
     if option_id not in valid_ids:
         return jsonify({"error": "Invalid option"}), 400
     
-    # Save Vote
-    votes = load_votes()
-    votes[option_id] += 1
-    save_votes(votes)
-    
-    # Update Meta
-    meta = load_meta()
-    meta["last_vote"] = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-    meta["total_clicks"] += 1
-    save_meta(meta)
+    # Atomický Read-Modify-Write – jeden zámek pro celý cyklus
+    votes = increment_vote(option_id)
+    update_meta(datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
 
     # Log IP
     with voters_lock:
