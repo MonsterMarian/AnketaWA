@@ -7,14 +7,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToVoteBtn = document.getElementById('back-to-vote-btn');
     const liveIndicator = document.getElementById('live-indicator');
 
-    const votedText = localStorage.getItem('votedOptionText');
-    if (votedText) {
-        const infoMsg = document.createElement('div');
-        infoMsg.className = 'info-message';
-        infoMsg.style.cssText = 'background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.2);';
-        infoMsg.innerHTML = `Váš uložený hlas: <strong>${votedText}</strong>`;
-        voteForm.prepend(infoMsg);
-    }
+    const showVotedText = () => {
+        const text = localStorage.getItem('votedOptionText');
+        if (!text) return;
+
+        let info1 = voteForm.querySelector('.info-message');
+        if (!info1) {
+            info1 = document.createElement('div');
+            info1.className = 'info-message';
+            info1.style.cssText = 'background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.2);';
+            voteForm.prepend(info1);
+        }
+        info1.innerHTML = `Váš uložený hlas: <strong>${text}</strong>`;
+
+        let info2 = resultsCard.querySelector('.info-message-results');
+        if (!info2) {
+            info2 = document.createElement('div');
+            info2.className = 'info-message-results';
+            info2.style.cssText = 'background: rgba(99, 102, 241, 0.1); color: var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600; border: 1px solid rgba(99, 102, 241, 0.2);';
+            const headerDiv = resultsCard.querySelector('div');
+            headerDiv.insertAdjacentElement('afterend', info2);
+        }
+        info2.innerHTML = `Vámi zvolená možnost: <strong>${text}</strong>`;
+    };
+    showVotedText();
 
     let resultsChart = null;
     let pollingInterval = null;
@@ -136,6 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (res.status === 403) {
                 alert('Již jste hlasoval(a). Více hlasů není povoleno.');
+                if (!localStorage.getItem('votedOptionText')) {
+                    localStorage.setItem('votedOptionText', selected.nextElementSibling.textContent);
+                    showVotedText();
+                }
                 fetchResults(true);
                 return;
             }
@@ -143,6 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const votes = await res.json();
             const selectedText = selected.nextElementSibling.textContent;
             localStorage.setItem('votedOptionText', selectedText);
+            showVotedText();
             runConfetti();
             updateResultsUI(votes);
             votingCard.style.display = 'none';
