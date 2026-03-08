@@ -196,7 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (res.ok) {
                     alert('Hlasy úspěšně resetovány.');
+                    localStorage.removeItem('votedOptionText'); // Clear local UI memory
                     fetchResults(false);
+                    // Force page reload to clear the HTTP-only cookie if it was cleared
+                    window.location.reload();
                 } else {
                     alert('Neplatný token!');
                 }

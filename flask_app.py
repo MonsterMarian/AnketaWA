@@ -155,7 +155,10 @@ def reset():
             # Write empty string to avoid removing an open file on Windows
             open(VOTERS_FILE, 'w').close()
         
-    return jsonify({"success": True, "votes": votes})
+    response = jsonify({"success": True, "votes": votes})
+    # Tell the browser to delete the cookie so the user can vote again
+    response.set_cookie('voted', '', expires=0)
+    return response
 
 @app.route('/admin')
 def admin_panel():
