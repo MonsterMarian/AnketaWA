@@ -160,4 +160,28 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsCard.style.display = 'none';
         votingCard.style.display = 'block';
     });
+
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            const token = prompt('Zadejte administrátorský token pro smazání všech hlasů:');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/reset', {
+                    method: 'POST',
+                    headers: { 'Authorization': token }
+                });
+
+                if (res.ok) {
+                    alert('Hlasy úspěšně resetovány.');
+                    fetchResults(false);
+                } else {
+                    alert('Neplatný token!');
+                }
+            } catch (err) {
+                alert('Chyba komunikace se serverem.');
+            }
+        });
+    }
 });

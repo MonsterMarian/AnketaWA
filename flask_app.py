@@ -106,7 +106,8 @@ def vote():
         return jsonify({"error": "You have already voted (cookie)"}), 403
 
     # 2. Check IP Address safely
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr).split(',')[0].strip()
+    forwarded_for = request.headers.get('X-Forwarded-For')
+    user_ip = forwarded_for.split(',')[0].strip() if forwarded_for else str(request.remote_addr)
     
     with voters_lock:
         if os.path.exists(VOTERS_FILE):
